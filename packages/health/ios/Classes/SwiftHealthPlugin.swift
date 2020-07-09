@@ -15,7 +15,9 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let BODY_FAT_PERCENTAGE = "BODY_FAT_PERCENTAGE"
     let HEIGHT = "HEIGHT"
     let WEIGHT = "WEIGHT"
+    let BODY_MASS = "BODY_MASS"
     let BODY_MASS_INDEX = "BODY_MASS_INDEX"
+    let LEAN_BODY_MASS = "LEAN_BODY_MASS"
     let WAIST_CIRCUMFERENCE = "WAIST_CIRCUMFERENCE"
     let STEPS = "STEPS"
     let BASAL_ENERGY_BURNED = "BASAL_ENERGY_BURNED"
@@ -32,7 +34,50 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let HIGH_HEART_RATE_EVENT = "HIGH_HEART_RATE_EVENT"
     let LOW_HEART_RATE_EVENT = "LOW_HEART_RATE_EVENT"
     let IRREGULAR_HEART_RATE_EVENT = "IRREGULAR_HEART_RATE_EVENT"
-
+    let HEART_RATE_VARIABILITY_SDNN = "HEART_RATE_VARIABILITY_SDNN"
+    let WALKING_HEART_RATE_AVERAGE = "WALKING_HEART_RATE_AVERAGE"
+    let OXYGEN_SATURATION = "OXYGEN_SATURATION"
+    let RESPIRATORY_RATE = "RESPIRATORY_RATE"
+    let VO2_MAX = "VO2_MAX"
+    let BASAL_BODY_TEMPERATURE = "BASAL_BODY_TEMPERATURE"
+    let BLOOD_ALCOHOL_CONTENT = "BLOOD_ALCOHOL_CONTENT"
+    let ELECTRODERMAL_ACTIVITY = "ELECTRODERMAL_ACTIVITY"
+    let FORCED_EXPIRATORY_VOLUME1 = "FORCED_EXPIRATORY_VOLUME1"
+    let FORCED_VITAL_CAPACITY = "FORCED_VITAL_CAPACITY"
+    let INHALER_USAGE = "INHALER_USAGE"
+    let INSULIN_DELIVERY = "INSULIN_DELIVERY"
+    let NUMBER_OF_TIMES_FALLEN = "NUMBER_OF_TIMES_FALLEN"
+    let PEAK_EXPIRATORY_FLOW_RATE = "PEAK_EXPIRATORY_FLOW_RATE"
+    let PERIPHERAL_PERFUSION_INDEX = "PERIPHERAL_PERFUSION_INDEX"
+    let DIETARY_ENERGY_CONSUMED = "DIETARY_ENERGY_CONSUMED"
+    let DIETARY_FAT_TOTAL = "DIETARY_FAT_TOTAL"
+    let DIETARY_FAT_SATURATED = "DIETARY_FAT_SATURATED"
+    let DIETARY_CHOLESTROL = "DIETARY_CHOLESTROL"
+    let DIETARY_CARBOHYDRATES = "DIETARY_CARBOHYDRATES"
+    let DIETARY_FIBER = "DIETARY_FIBER"
+    let DIETARY_SUGAR = "DIETARY_SUGAR"
+    let DIETARY_PROTEIN = "DIETARY_PROTEIN"
+    let DIETARY_CALCIUM = "DIETARY_CALCIUM"
+    let DIETARY_IRON = "DIETARY_IRON"
+    let DIETARY_POTASSIUM = "DIETARY_POTASSIUM"
+    let DIETARY_SODIUM = "DIETARY_SODIUM"
+    let DIETARY_VITAMIN_A = "DIETARY_VITAMIN_A"
+    let DIETARY_VITAMIN_B = "DIETARY_VITAMIN_B"
+    let DIETARY_VITAMIN_C = "DIETARY_VITAMIN_C"
+    let DIETARY_VITAMIN_D = "DIETARY_VITAMIN_D"
+    let DISTANCE_WALKING_RUNNING = "DISTANCE_WALKING_RUNNING"
+    let DISTANCE_CYCLING = "DISTANCE_CYCLING"
+    let PUSH_COUNT = "PUSH_COUNT"
+    let DISTANCE_WHEEL_CHAIR = "DISTANCE_WHEEL_CHAIR"
+    let SWIMMING_STROKE_COUNT = "SWIMMING_STROKE_COUNT"
+    let DISTANCE_DOWNHILL_SNOW_SPORTS = "DISTANCE_DOWNHILL_SNOW_SPORTS"
+    let FLIGHTS_CLIMBED = "FLIGHTS_CLIMBED"
+    let NIKE_FUEL = "NIKE_FUEL"
+    let APPLE_EXERCISE_TIME = "APPLE_EXERCISE_TIME"
+    let UV_EXPOSURE = "UV_EXPOSURE"
+    let ENVIRONMENTAL_AUDIO_EXPOSURE = "ENVIRONMENTAL_AUDIO_EXPOSURE"
+    let HEADPHONE_AUDIO_EXPOSURE = "HEADPHONE_AUDIO_EXPOSURE"
+                       
     public static func register(with registrar: FlutterPluginRegistrar) {
         let channel = FlutterMethodChannel(name: "flutter_health", binaryMessenger: registrar.messenger())
         let instance = SwiftHealthPlugin()
@@ -54,7 +99,11 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
         /// Handle getData
         else if (call.method.elementsEqual("getData")){
-            getData(call: call, result: result)
+            if #available(iOS 9.0, *) {
+                getData(call: call, result: result)
+            } else {
+                // Fallback on earlier versions
+            }
         }
     }
 
@@ -82,6 +131,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         }
     }
 
+    @available(iOS 9.0, *)
     func getData(call: FlutterMethodCall, result: @escaping FlutterResult) {
         let arguments = call.arguments as? NSDictionary
         let dataTypeKey = (arguments?["dataTypeKey"] as? String) ?? "DEFAULT"
@@ -103,15 +153,35 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 result(FlutterError(code: "FlutterHealth", message: "Results are null", details: error))
                 return
             }
+            
+            let formatter = DateFormatter()
+            // initially set the format based on your datepicker date / server String
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
+
+                    HKHealthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
+                        if (error == nil) {
+
+                            if(unitDict[dataTypeKey] == nil)
+                            {
+                                unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
+                            }
+                            
+
+                        }
+                    })
+                    
                     let unit = self.unitLookUp(key: dataTypeKey)
                     
                     return [
+                        "unit": unit.unitString,
+                        "source": sample.sourceRevision.source.name,
+                        "device": sample.device != nil ? sample.device!.name! : "",
                         "value": sample.quantity.doubleValue(for: unit),
-                        "date_from": Int(sample.startDate.timeIntervalSince1970 * 1000),
-                        "date_to": Int(sample.endDate.timeIntervalSince1970 * 1000),
+                        "start_date": formatter.string(from: Date(timeIntervalSince1970: startDate.doubleValue / 1000)),
+                        "end_date": formatter.string(from: Date(timeIntervalSince1970: endDate.doubleValue / 1000)),
                     ]
                 })
             }
@@ -153,6 +223,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         unitDict[ELECTRODERMAL_ACTIVITY] = HKUnit.siemen()
         unitDict[WEIGHT] = HKUnit.gramUnit(with: .kilo)
 
+
+
         // Set up iOS 11 specific types (ordinary health data types)
         if #available(iOS 11.0, *) { 
             dataTypesDict[BODY_FAT_PERCENTAGE] = HKSampleType.quantityType(forIdentifier: .bodyFatPercentage)!
@@ -172,6 +244,57 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesDict[BLOOD_GLUCOSE] = HKSampleType.quantityType(forIdentifier: .bloodGlucose)!
             dataTypesDict[ELECTRODERMAL_ACTIVITY] = HKSampleType.quantityType(forIdentifier: .electrodermalActivity)!
             dataTypesDict[WEIGHT] = HKSampleType.quantityType(forIdentifier: .bodyMass)!
+            dataTypesDict[DISTANCECYCLING] = HKSampleType.quantityType(forIdentifier: .distanceCycling)!
+            dataTypesDict[BODY_MASS] = HKSampleType.quantityType(forIdentifier: .bodyMass)!
+            dataTypesDict[LEAN_BODY_MASS] = HKSampleType.quantityType(forIdentifier: .leanBodyMass)!
+            dataTypesDict[HEART_RATE_VARIABILITY_SDNN] = HKSampleType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!
+            dataTypesDict[WALKING_HEART_RATE_AVERAGE] = HKSampleType.quantityType(forIdentifier: .walkingHeartRateAverage)dataTypesDict[OXYGEN_SATURATION] = HKSampleType.quantityType(forIdentifier: .oxygenSaturation)!
+            dataTypesDict[RESPIRATORY_RATE] = HKSampleType.quantityType(forIdentifier: .respiratoryRate)!
+            dataTypesDict[VO2_MAX] = HKSampleType.quantityType(forIdentifier: .vo2Max)!
+            dataTypesDict[BASAL_BODY_TEMPERATURE] = HKSampleType.quantityType(forIdentifier: .basalBodyTemperature)!
+            dataTypesDict[BLOOD_ALCOHOL_CONTENT] = HKSampleType.quantityType(forIdentifier: .bloodAlcoholContent)!
+            dataTypesDict[BLOOD_GLUCOSE] = HKSampleType.quantityType(forIdentifier: .bloodGlucose)!
+            dataTypesDict[ELECTRO_DERMAL_ACTIVITY] = HKSampleType.quantityType(forIdentifier: .electrodermalActivity)!
+            dataTypesDict[FORCED_EXPIRATORY_VOLUME1] = HKSampleType.quantityType(forIdentifier: .forcedExpiratoryVolume1)!
+            dataTypesDict[FORCED_VITAL_CAPACITY] = HKSampleType.quantityType(forIdentifier: .forcedVitalCapacity)!
+            dataTypesDict[INHALER_USAGE] = HKSampleType.quantityType(forIdentifier: .inhalerUsage)!
+            dataTypesDict[INSULIN_DELIVERY] = HKSampleType.quantityType(forIdentifier: .insulinDelivery)!
+            dataTypesDict[NUMBER_OF_TIMES_FALLEN] = HKSampleType.quantityType(forIdentifier: .numberOfTimesFallen)!
+            dataTypesDict[PEAK_EXPIRATORY_FLOW_RATE] = HKSampleType.quantityType(forIdentifier: .peakExpiratoryFlowRate)!
+            dataTypesDict[PERIPHERAL_PERFUSION_INDEX] = HKSampleType.quantityType(forIdentifier: .peripheralPerfusionIndex)!
+                   
+            dataTypesDict[DIETARY_ENERGY_CONSUMED] = HKSampleType.quantityType(forIdentifier: .dietaryEnergyConsumed)!
+            dataTypesDict[DIETARY_FAT_TOTAL] = HKSampleType.quantityType(forIdentifier: .dietaryFatTotal)!
+            dataTypesDict[DIETARY_FAT_SATURATED] = HKSampleType.quantityType(forIdentifier: .dietaryFatSaturated)!
+            dataTypesDict[DIETARY_CHOLESTEROL] = HKSampleType.quantityType(forIdentifier: .dietaryCholesterol)!
+            dataTypesDict[DIETARY_CARBOHYDRATES] = HKSampleType.quantityType(forIdentifier: .dietaryCarbohydrates)!
+            dataTypesDict[DIETARY_FIBER] = HKSampleType.quantityType(forIdentifier: .dietaryFiber)!
+            dataTypesDict[DIETARY_SUGAR] = HKSampleType.quantityType(forIdentifier: .dietarySugar)!
+            dataTypesDict[DIETARY_PROTEIN] = HKSampleType.quantityType(forIdentifier: .dietaryProtein)!
+            dataTypesDict[DIETARY_CALCIUM] = HKSampleType.quantityType(forIdentifier: .dietaryCalcium)!
+            dataTypesDict[DIETARY_IRON] = HKSampleType.quantityType(forIdentifier: .dietaryIron)!
+            dataTypesDict[DIETARY_POTASSIUM] = HKSampleType.quantityType(forIdentifier: .dietaryPotassium)!
+            dataTypesDict[DIETARY_SODIUM] = HKSampleType.quantityType(forIdentifier: .dietarySodium)!
+            dataTypesDict[DIETARY_VITAMIN_A] = HKSampleType.quantityType(forIdentifier: .dietaryVitaminA)!
+            dataTypesDict[DIETARY_VITAMIN_C] = HKSampleType.quantityType(forIdentifier: .dietaryVitaminC)!
+            dataTypesDict[DIETARY_VITAMIN_D] = HKSampleType.quantityType(forIdentifier: .dietaryVitaminD)!
+                   
+            dataTypesDict[DISTANCE_WALKING_RUNNING] = HKSampleType.quantityType(forIdentifier: .distanceWalkingRunning)!
+            dataTypesDict[PUSH_COUNT] = HKSampleType.quantityType(forIdentifier: .pushCount)!
+            dataTypesDict[DISTANCE_WHEELCHAIR] = HKSampleType.quantityType(forIdentifier: .distanceWheelchair)!
+            dataTypesDict[SWIMMING_STROKE_COUNT] = HKSampleType.quantityType(forIdentifier: .swimmingStrokeCount)!
+            dataTypesDict[DISTANCE_SWIMMING] = HKSampleType.quantityType(forIdentifier: .distanceSwimming)!
+            dataTypesDict[DISTANCE_DOWNHILL_SNOW_SPORTS] = HKSampleType.quantityType(forIdentifier: .distanceDownhillSnowSports)!
+            dataTypesDict[BASAL_ENERGY_BURNED] = HKSampleType.quantityType(forIdentifier: .basalEnergyBurned)!
+            dataTypesDict[ACTIVE_ENERGY_BURNED] = HKSampleType.quantityType(forIdentifier: .activeEnergyBurned)!
+            dataTypesDict[FLIGHTS_CLIMBED] = HKSampleType.quantityType(forIdentifier: .flightsClimbed)!
+            dataTypesDict[NIKE_FUEL] = HKSampleType.quantityType(forIdentifier: .nikeFuel)!
+            dataTypesDict[APPLE_EXERCISE_TIME] = HKSampleType.quantityType(forIdentifier: .appleExerciseTime)!
+            dataTypesDict[APPLE_STAND_TIME] = HKSampleType.quantityType(forIdentifier: .appleStandTime)!    
+            dataTypesDict[UV_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .uvExposure)!
+            dataTypesDict[ENVIRONMENTAL_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .environmentalAudioExposure)!
+            dataTypesDict[HEADPHONE_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .headphoneAudioExposure)!
+
 
             healthDataTypes = Array(dataTypesDict.values)
         }
@@ -193,7 +316,3 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     }
     
 }
-
-
-
-
