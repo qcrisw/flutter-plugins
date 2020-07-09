@@ -162,12 +162,12 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
 
-                    healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
+                    self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
                         if (error == nil) {
 
-                            if(unitDict[dataTypeKey] == nil)
+                            if(self.unitDict[dataTypeKey] == nil)
                             {
-                                unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
+                                self.unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
                             }
                             
 
@@ -291,7 +291,11 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesDict[FLIGHTS_CLIMBED] = HKSampleType.quantityType(forIdentifier: .flightsClimbed)!
             dataTypesDict[NIKE_FUEL] = HKSampleType.quantityType(forIdentifier: .nikeFuel)!
             dataTypesDict[APPLE_EXERCISE_TIME] = HKSampleType.quantityType(forIdentifier: .appleExerciseTime)!
-            dataTypesDict[APPLE_STAND_TIME] = HKSampleType.quantityType(forIdentifier: .appleStandTime)!    
+            if #available(iOS 13.0, *) {
+                dataTypesDict[APPLE_STAND_TIME] = HKSampleType.quantityType(forIdentifier: .appleStandTime)!
+            } else {
+                // Fallback on earlier versions
+            }
             dataTypesDict[UV_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .uvExposure)!
             if #available(iOS 13.0, *) {
                 dataTypesDict[ENVIRONMENTAL_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .environmentalAudioExposure)!
