@@ -41,7 +41,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let VO2_MAX = "VO2_MAX"
     let BASAL_BODY_TEMPERATURE = "BASAL_BODY_TEMPERATURE"
     let BLOOD_ALCOHOL_CONTENT = "BLOOD_ALCOHOL_CONTENT"
-    let ELECTRODERMAL_ACTIVITY = "ELECTRODERMAL_ACTIVITY"
     let FORCED_EXPIRATORY_VOLUME1 = "FORCED_EXPIRATORY_VOLUME1"
     let FORCED_VITAL_CAPACITY = "FORCED_VITAL_CAPACITY"
     let INHALER_USAGE = "INHALER_USAGE"
@@ -52,7 +51,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let DIETARY_ENERGY_CONSUMED = "DIETARY_ENERGY_CONSUMED"
     let DIETARY_FAT_TOTAL = "DIETARY_FAT_TOTAL"
     let DIETARY_FAT_SATURATED = "DIETARY_FAT_SATURATED"
-    let DIETARY_CHOLESTROL = "DIETARY_CHOLESTROL"
+    let DIETARY_CHOLESTEROL = "DIETARY_CHOLESTEROL"
     let DIETARY_CARBOHYDRATES = "DIETARY_CARBOHYDRATES"
     let DIETARY_FIBER = "DIETARY_FIBER"
     let DIETARY_SUGAR = "DIETARY_SUGAR"
@@ -68,11 +67,13 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     let DISTANCE_WALKING_RUNNING = "DISTANCE_WALKING_RUNNING"
     let DISTANCE_CYCLING = "DISTANCE_CYCLING"
     let PUSH_COUNT = "PUSH_COUNT"
-    let DISTANCE_WHEEL_CHAIR = "DISTANCE_WHEEL_CHAIR"
+    let DISTANCE_WHEELCHAIR = "DISTANCE_WHEELCHAIR"
     let SWIMMING_STROKE_COUNT = "SWIMMING_STROKE_COUNT"
+    let DISTANCE_SWIMMING = "DISTANCE_SWIMMING"
     let DISTANCE_DOWNHILL_SNOW_SPORTS = "DISTANCE_DOWNHILL_SNOW_SPORTS"
     let FLIGHTS_CLIMBED = "FLIGHTS_CLIMBED"
     let NIKE_FUEL = "NIKE_FUEL"
+    let APPLE_STAND_TIME = "APPLE_STAND_TIME"
     let APPLE_EXERCISE_TIME = "APPLE_EXERCISE_TIME"
     let UV_EXPOSURE = "UV_EXPOSURE"
     let ENVIRONMENTAL_AUDIO_EXPOSURE = "ENVIRONMENTAL_AUDIO_EXPOSURE"
@@ -121,7 +122,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesToRequest.insert(dataTypeLookUp(key: keyString))
         }
 
-        if #available(iOS 11.0, *) {
+        if #available(iOS 11.2, *) {
             healthStore.requestAuthorization(toShare: nil, read: allDataTypes) { (success, error) in
                 result(success)
             }
@@ -161,7 +162,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
 
-                    HKHealthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
+                    healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
                         if (error == nil) {
 
                             if(unitDict[dataTypeKey] == nil)
@@ -226,7 +227,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
 
         // Set up iOS 11 specific types (ordinary health data types)
-        if #available(iOS 11.0, *) { 
+        if #available(iOS 11.2, *) { 
             dataTypesDict[BODY_FAT_PERCENTAGE] = HKSampleType.quantityType(forIdentifier: .bodyFatPercentage)!
             dataTypesDict[HEIGHT] = HKSampleType.quantityType(forIdentifier: .height)!
             dataTypesDict[BODY_MASS_INDEX] = HKSampleType.quantityType(forIdentifier: .bodyMassIndex)!
@@ -244,17 +245,17 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesDict[BLOOD_GLUCOSE] = HKSampleType.quantityType(forIdentifier: .bloodGlucose)!
             dataTypesDict[ELECTRODERMAL_ACTIVITY] = HKSampleType.quantityType(forIdentifier: .electrodermalActivity)!
             dataTypesDict[WEIGHT] = HKSampleType.quantityType(forIdentifier: .bodyMass)!
-            dataTypesDict[DISTANCECYCLING] = HKSampleType.quantityType(forIdentifier: .distanceCycling)!
+            dataTypesDict[DISTANCE_CYCLING] = HKSampleType.quantityType(forIdentifier: .distanceCycling)!
             dataTypesDict[BODY_MASS] = HKSampleType.quantityType(forIdentifier: .bodyMass)!
             dataTypesDict[LEAN_BODY_MASS] = HKSampleType.quantityType(forIdentifier: .leanBodyMass)!
             dataTypesDict[HEART_RATE_VARIABILITY_SDNN] = HKSampleType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!
-            dataTypesDict[WALKING_HEART_RATE_AVERAGE] = HKSampleType.quantityType(forIdentifier: .walkingHeartRateAverage)dataTypesDict[OXYGEN_SATURATION] = HKSampleType.quantityType(forIdentifier: .oxygenSaturation)!
+            dataTypesDict[WALKING_HEART_RATE_AVERAGE] = HKSampleType.quantityType(forIdentifier: .walkingHeartRateAverage)!
+            dataTypesDict[OXYGEN_SATURATION] = HKSampleType.quantityType(forIdentifier: .oxygenSaturation)!
             dataTypesDict[RESPIRATORY_RATE] = HKSampleType.quantityType(forIdentifier: .respiratoryRate)!
             dataTypesDict[VO2_MAX] = HKSampleType.quantityType(forIdentifier: .vo2Max)!
             dataTypesDict[BASAL_BODY_TEMPERATURE] = HKSampleType.quantityType(forIdentifier: .basalBodyTemperature)!
             dataTypesDict[BLOOD_ALCOHOL_CONTENT] = HKSampleType.quantityType(forIdentifier: .bloodAlcoholContent)!
             dataTypesDict[BLOOD_GLUCOSE] = HKSampleType.quantityType(forIdentifier: .bloodGlucose)!
-            dataTypesDict[ELECTRO_DERMAL_ACTIVITY] = HKSampleType.quantityType(forIdentifier: .electrodermalActivity)!
             dataTypesDict[FORCED_EXPIRATORY_VOLUME1] = HKSampleType.quantityType(forIdentifier: .forcedExpiratoryVolume1)!
             dataTypesDict[FORCED_VITAL_CAPACITY] = HKSampleType.quantityType(forIdentifier: .forcedVitalCapacity)!
             dataTypesDict[INHALER_USAGE] = HKSampleType.quantityType(forIdentifier: .inhalerUsage)!
@@ -292,8 +293,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             dataTypesDict[APPLE_EXERCISE_TIME] = HKSampleType.quantityType(forIdentifier: .appleExerciseTime)!
             dataTypesDict[APPLE_STAND_TIME] = HKSampleType.quantityType(forIdentifier: .appleStandTime)!    
             dataTypesDict[UV_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .uvExposure)!
-            dataTypesDict[ENVIRONMENTAL_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .environmentalAudioExposure)!
-            dataTypesDict[HEADPHONE_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .headphoneAudioExposure)!
+            if #available(iOS 13.0, *) {
+                dataTypesDict[ENVIRONMENTAL_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .environmentalAudioExposure)!
+                dataTypesDict[HEADPHONE_AUDIO_EXPOSURE] = HKSampleType.quantityType(forIdentifier: .headphoneAudioExposure)!
+            }
 
 
             healthDataTypes = Array(dataTypesDict.values)
