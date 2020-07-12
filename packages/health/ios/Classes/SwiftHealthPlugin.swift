@@ -165,10 +165,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                     self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
                         if (error == nil) {
 
-                            if(self.unitDict[dataTypeKey] == nil)
-                            {
-                                self.unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
-                            }
+                            self.unitAdd(key: dataTypeKey, value: preferredUnits[sample.quantityType] ?? HKUnit.count())
                         }
                     })
                     
@@ -194,6 +191,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             return HKUnit.count()
         }
         return unit
+    }
+
+    func unitAdd(key: String, value: HKUnit) -> Void {
+        unitDict[key] = value
     }
 
     func dataTypeLookUp(key: String) -> HKSampleType {
