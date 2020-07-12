@@ -181,8 +181,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         "source": sample.sourceRevision.source.name,
                         "device": sample.device != nil ? sample.device!.name! : "",
                         "value": sample.quantity.doubleValue(for: unit),
-                        "start_date": sample.startDate,
-                        "end_date": sample.endDate,
+                        "start_date": formatter.string(from: sample.startDate),
+                        "end_date": formatter.string(from: sample.endDate),
                     ]
                 })
             }
