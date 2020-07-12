@@ -162,17 +162,15 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
 
-//                     self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
-//                         if (error == nil) {
+                    self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
+                        if (error == nil) {
 
-//                             if(self.unitDict[dataTypeKey] == nil)
-//                             {
-//                                 self.unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
-//                             }
-                            
-
-//                         }
-//                     })
+                            if(self.unitDict[dataTypeKey] == nil)
+                            {
+                                self.unitDict[dataTypeKey] = preferredUnits[sample.quantityType]
+                            }
+                        }
+                    })
                     
                     let unit = self.unitLookUp(key: dataTypeKey)
                     
