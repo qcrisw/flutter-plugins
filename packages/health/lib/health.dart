@@ -136,6 +136,10 @@ class HealthDataPoint {
   int dateTo;
   String dataType;
   String platform;
+  String startDate;
+  String endDate;
+  String source;
+  String device;
 
   HealthDataPoint(this.value, this.unit, this.dateFrom, this.dateTo, this.dataType, this.platform);
 
@@ -143,10 +147,11 @@ class HealthDataPoint {
     try {
       value = json['value'];
       unit = json['unit'];
-      dateFrom = json['date_from'];
-      dateTo = json['date_to'];
       dataType = json['data_type'];
-      platform = json['platform_type'];
+      startDate = json['start_date'];
+      endDate = json['end_date'];
+      source = json['source'];
+      device = json['device'];
     } catch (error) {
       print(error);
     }
@@ -156,21 +161,22 @@ class HealthDataPoint {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['value'] = this.value;
     data['unit'] = this.unit;
-    data['date_from'] = this.dateFrom;
-    data['date_to'] = this.dateTo;
+    data['start_date'] = this.startDate;
+    data['end_date'] = this.endDate;
     data['data_type'] = this.dataType;
-    data['platform_type'] = this.platform;
+    data['source'] = this.source;
+    data['device'] = this.device;
     return data;
   }
 
   String toString() => '${this.runtimeType} - '
       'value: $value, '
       'unit: $unit, '
-      'date_from: $dateFrom, '
-      'dateFrom: $dateFrom, '
-      'dateTo: $dateTo, '
+      'start_date: $startDate, '
+      'end_date: $endDate, '
       'dataType: $dataType, '
-      'platform: $platform';
+      'device: $device, '
+      'source: $source';
 }
 
 /// Main class for the Plugin
