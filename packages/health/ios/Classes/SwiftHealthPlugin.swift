@@ -162,7 +162,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
 
-                    let unit: HKUnit? = nil
+                    var unit: HKUnit? = nil
 
                     self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
                         if (error == nil) {
@@ -179,7 +179,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         "unit": unit!.unitString,
                         "source": sample.sourceRevision.source.name,
                         "device": sample.device != nil ? sample.device!.name! : "",
-                        "value": sample.quantity.doubleValue(for: unit),
+                        "value": sample.quantity.doubleValue(for: unit!),
                         "start_date": formatter.string(from: sample.startDate),
                         "end_date": formatter.string(from: sample.endDate),
                     ]
