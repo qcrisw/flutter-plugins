@@ -168,6 +168,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         if (error == nil) {
 
                             unit = preferredUnits[sample.quantityType]
+                            print(sample.quantityType)
+                            print(unit)
                         }
                         else
                         {
