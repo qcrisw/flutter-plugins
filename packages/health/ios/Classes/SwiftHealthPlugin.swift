@@ -167,6 +167,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
                             self.unitAdd(key: sample.quantityType.description, value: preferredUnits[sample.quantityType] ?? HKUnit.count())
                         }
+                        else
+                        {
+                            print(error)
+                        }
                     })
                     
                     let unit = self.unitLookUp(key: sample.quantityType.description)
