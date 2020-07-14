@@ -166,8 +166,8 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 result(samples.map { sample -> NSDictionary in
 
                     let unit = self.unitDict[sample.quantityType]
-                                        
-                    return [
+                    
+                    var returnObj: NSDictionary = [
                         "unit": unit!.unitString,
                         "source": sample.sourceRevision.source.name,
                         "device": sample.device != nil ? sample.device!.name! : "",
@@ -175,6 +175,10 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                         "start_date": formatter.string(from: sample.startDate),
                         "end_date": formatter.string(from: sample.endDate),
                     ]
+                    
+                    print(returnObj)
+                                        
+                    return returnObj
                 })
             }
             return
@@ -301,6 +305,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 for dataType in self.healthDataTypes
                 {
                     self.unitDict[dataType as HKSampleType] = preferredUnits[dataType]
+                    print(preferredUnits[dataType]!.unitString)
                 }
                 
             }
