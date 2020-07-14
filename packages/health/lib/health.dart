@@ -175,7 +175,7 @@ class HealthDataPoint {
       'end_date: $endDate, '
       'dataType: $dataType, '
       'device: $device, '
-      'source: $source';
+      'source: $source, '
       'platform: $platform';
 }
 

@@ -182,13 +182,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         HKHealthStore().execute(query)
     }
 
-//    func unitLookUp(key: String) -> HKUnit {
-//        guard let unit = unitDict[key] else {
-//            return HKUnit.count()
-//        }
-//        return unit
-//    }
-
 
     func dataTypeLookUp(key: String) -> HKSampleType {
         guard let dataType_ = dataTypesDict[key] else {
@@ -199,25 +192,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
     @available(iOS 8.2, *)
     func initializeTypes() {
-//        unitDict[BODY_FAT_PERCENTAGE] = HKUnit.percent()
-//        unitDict[HEIGHT] = HKUnit.meter()
-//        unitDict[BODY_MASS_INDEX] = HKUnit.init(from: "")
-//        unitDict[WAIST_CIRCUMFERENCE] = HKUnit.meter()
-//        unitDict[STEPS] = HKUnit.count()
-//        unitDict[BASAL_ENERGY_BURNED] = HKUnit.kilocalorie()
-//        unitDict[ACTIVE_ENERGY_BURNED] = HKUnit.kilocalorie()
-//        unitDict[HEART_RATE] = HKUnit.init(from: "count/min")
-//        unitDict[BODY_TEMPERATURE] = HKUnit.degreeCelsius()
-//        unitDict[BLOOD_PRESSURE_SYSTOLIC] = HKUnit.millimeterOfMercury()
-//        unitDict[BLOOD_PRESSURE_DIASTOLIC] = HKUnit.millimeterOfMercury()
-//        unitDict[RESTING_HEART_RATE] = HKUnit.init(from: "count/min")
-//        unitDict[WALKING_HEART_RATE] = HKUnit.init(from: "count/min")
-//        unitDict[BLOOD_OXYGEN] = HKUnit.percent()
-//        unitDict[BLOOD_GLUCOSE] = HKUnit.init(from: "mg/dl")
-//        unitDict[ELECTRODERMAL_ACTIVITY] = HKUnit.siemen()
-//        unitDict[WEIGHT] = HKUnit.gramUnit(with: .kilo)
-
-
 
         // Set up iOS 11 specific types (ordinary health data types)
         if #available(iOS 11.2, *) { 
