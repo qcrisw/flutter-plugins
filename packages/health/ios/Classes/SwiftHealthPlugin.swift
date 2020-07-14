@@ -10,7 +10,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     var allDataTypes = Set<HKSampleType>()
     var quantityTypesDict: [String: HKQuantityType] = [:]
     var dataTypesDict: [String: HKSampleType] = [:]
-    var unitDict: [String: HKUnit] = [:]
+    var unitDict: [HKSampleType: HKUnit] = [:]
 
     // Health Data Type Keys
     let BODY_FAT_PERCENTAGE = "BODY_FAT_PERCENTAGE"
@@ -182,12 +182,12 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         HKHealthStore().execute(query)
     }
 
-    func unitLookUp(key: String) -> HKUnit {
-        guard let unit = unitDict[key] else {
-            return HKUnit.count()
-        }
-        return unit
-    }
+//    func unitLookUp(key: String) -> HKUnit {
+//        guard let unit = unitDict[key] else {
+//            return HKUnit.count()
+//        }
+//        return unit
+//    }
 
 
     func dataTypeLookUp(key: String) -> HKSampleType {
@@ -326,7 +326,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
                 for dataType in self.healthDataTypes
                 {
-                    self.unitDict[ self.dataTypesDict.someKey(forValue: dataType)! ] = preferredUnits[dataType]
+                    self.unitDict[dataType as HKSampleType] = preferredUnits[dataType]
                 }
                 
             }
