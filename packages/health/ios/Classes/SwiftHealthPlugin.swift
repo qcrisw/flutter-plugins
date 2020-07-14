@@ -6,6 +6,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
     
     let healthStore = HKHealthStore()
     var healthDataTypes = [HKQuantityType]()
+    var healthDataSampleTypes = [HKSampleType]()
     var heartRateEventTypes = Set<HKSampleType>()
     var allDataTypes = Set<HKSampleType>()
     var quantityTypesDict: [String: HKQuantityType] = [:]
@@ -276,6 +277,11 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
             healthDataTypes = Array(quantityTypesDict.values)
         }
+        
+        dataTypesDict = quantityTypesDict.mapValues { (datatype: HKQuantityType) -> HKSampleType in
+            return datatype as HKSampleType
+        }
+        
         // Set up heart rate data types specific to the apple watch, requires iOS 12
         if #available(iOS 12.2, *){
             dataTypesDict[HIGH_HEART_RATE_EVENT] = HKSampleType.categoryType(forIdentifier: .highHeartRateEvent)!
@@ -288,9 +294,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 HKSampleType.categoryType(forIdentifier: .irregularHeartRhythmEvent)!,
                 ])
         }
-        
-        let healthDataSampleTypes: [HKSampleType]
-        
+                
         healthDataSampleTypes = healthDataTypes.map({(datatype: HKQuantityType) -> HKSampleType in
             return datatype as HKSampleType
         })
