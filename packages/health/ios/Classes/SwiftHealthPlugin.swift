@@ -163,25 +163,22 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             // initially set the format based on your datepicker date / server String
             formatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
 
-            if (samples != nil){
-                result(samples.map { sample -> NSDictionary in
+            result(samples.map { sample -> NSDictionary in
 
-                    let unit = self.unitDict[sample.quantityType]
-                    
-                    var returnObj: NSDictionary = [
-                        "unit": unit!.unitString,
-                        "source": sample.sourceRevision.source.name,
-                        "device": sample.device != nil ? sample.device!.name! : "",
-                        "value": sample.quantity.doubleValue(for: unit!),
-                        "start_date": formatter.string(from: sample.startDate),
-                        "end_date": formatter.string(from: sample.endDate),
-                    ]
-                    
-                    print(returnObj)
-                                        
-                    return returnObj
-                })
-            }
+                let unit = self.unitDict[sample.quantityType]
+                
+                let returnObj: NSDictionary = [
+                    "unit": unit!.unitString,
+                    "source": sample.sourceRevision.source.name,
+                    "device": sample.device != nil ? sample.device!.name! : "",
+                    "value": sample.quantity.doubleValue(for: unit!),
+                    "start_date": formatter.string(from: sample.startDate),
+                    "end_date": formatter.string(from: sample.endDate),
+                ]
+                                                        
+                return returnObj
+            })
+            
             return
         }
         HKHealthStore().execute(query)
@@ -311,10 +308,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                     self.unitDict[dataType as HKSampleType] = preferredUnits[dataType]
                 }
                 
-            }
-            else
-            {
-                print(error)
             }
         })
     }
