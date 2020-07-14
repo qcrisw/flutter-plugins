@@ -132,8 +132,6 @@ enum PlatformType { IOS, ANDROID }
 class HealthDataPoint {
   num value;
   String unit;
-  int dateFrom;
-  int dateTo;
   String dataType;
   String platform;
   String startDate;
@@ -141,7 +139,7 @@ class HealthDataPoint {
   String source;
   String device;
 
-  HealthDataPoint(this.value, this.unit, this.dateFrom, this.dateTo, this.dataType, this.platform);
+  HealthDataPoint(this.value, this.dataType, this.startDate, this.endDate, this.source, this.device, this.platform);
 
   HealthDataPoint.fromJson(Map<String, dynamic> json) {
     try {
@@ -264,7 +262,7 @@ class Health {
 
         // Convert to JSON, and then to HealthData object
         HealthDataPoint data = processDataPoint(dataPoint, dataType, unit);
-//            HealthDataPoint.fromJson(Map<String, dynamic>.from(dataPoint));
+//        HealthDataPoint.fromJson(Map<String, dynamic>.from(dataPoint));
         healthData.add(data);
       }
     } catch (error) {

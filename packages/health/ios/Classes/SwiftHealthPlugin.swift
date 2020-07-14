@@ -327,6 +327,7 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
                 for dataType in self.healthDataTypes
                 {
                     self.unitDict[dataType as HKSampleType] = preferredUnits[dataType]
+                    print(preferredUnits[dataType].unitString)
                 }
                 
             }
