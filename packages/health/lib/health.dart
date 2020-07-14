@@ -164,6 +164,7 @@ class HealthDataPoint {
     data['data_type'] = this.dataType;
     data['source'] = this.source;
     data['device'] = this.device;
+    data['platform_type'] = this.platform;
     return data;
   }
 
@@ -175,6 +176,7 @@ class HealthDataPoint {
       'dataType: $dataType, '
       'device: $device, '
       'source: $source';
+      'platform: $platform';
 }
 
 /// Main class for the Plugin
