@@ -150,6 +150,7 @@ class HealthDataPoint {
       endDate = json['end_date'];
       source = json['source'];
       device = json['device'];
+      platform = json['platform_type'];
     } catch (error) {
       print(error);
     }
@@ -195,22 +196,6 @@ class Health {
     return isAuthorized;
   }
 
-  // Calculate the BMI using the last observed height and weight values.
-  static Future<List<HealthDataPoint>> _androidBodyMassIndex(DateTime startDate, DateTime endDate) async {
-    List<HealthDataPoint> heights = await getHealthDataFromType(startDate, endDate, HealthDataType.HEIGHT);
-    List<HealthDataPoint> weights = await getHealthDataFromType(startDate, endDate, HealthDataType.WEIGHT);
-
-    num bmiValue = weights.last.value / (heights.last.value * heights.last.value);
-
-    HealthDataType dataType = HealthDataType.BODY_MASS_INDEX;
-    HealthDataUnit unit = _dataTypeToUnit[dataType];
-
-    HealthDataPoint bmi = HealthDataPoint(bmiValue, enumToString(unit), startDate.millisecond, endDate.millisecond,
-        enumToString(dataType), PlatformType.ANDROID.toString());
-
-    return [bmi];
-  }
-
   static HealthDataPoint processDataPoint(var dataPoint, HealthDataType dataType, HealthDataUnit unit) {
     // Set the platform_type and data_type fields
     dataPoint["platform_type"] = _platformType.toString();
@@ -231,11 +216,6 @@ class Health {
     // If not implemented on platform, throw an exception
     if (!isDataTypeAvailable(dataType)) {
       throw new HealthDataNotAvailableException(dataType, _platformType);
-    }
-
-    // If BodyMassIndex is requested on Android, calculate this manually in Dart
-    else if (dataType == HealthDataType.BODY_MASS_INDEX && _platformType == PlatformType.ANDROID) {
-      return _androidBodyMassIndex(startDate, endDate);
     }
 
     // Set parameters for method channel request
