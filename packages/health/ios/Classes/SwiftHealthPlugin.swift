@@ -87,7 +87,9 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
     public func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
         // Set up all data types
-        initializeTypes()
+        if #available(iOS 8.2, *) {
+            initializeTypes()
+        }
         
         /// Handle checkIfHealthDataAvailable
         if (call.method.elementsEqual("checkIfHealthDataAvailable")){
