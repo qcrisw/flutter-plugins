@@ -162,26 +162,13 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
             if (samples != nil){
                 result(samples.map { sample -> NSDictionary in
 
-                    var unit: HKUnit? = nil
-
-                    self.healthStore.preferredUnits(for: [sample.quantityType], completion: { (preferredUnits, error) -> Void in
-                        if (error == nil) {
-
-                            unit = preferredUnits[sample.quantityType]
-                            print(sample.quantityType)
-                            print(unit)
-                        }
-                        else
-                        {
-                            print(error)
-                        }
-                    })
+                    var unit = self.unitLookUp(key: dataTypeKey)
                                         
                     return [
-                        "unit": unit!.unitString,
+                        "unit": unit.unitString,
                         "source": sample.sourceRevision.source.name,
                         "device": sample.device != nil ? sample.device!.name! : "",
-                        "value": sample.quantity.doubleValue(for: unit!),
+                        "value": sample.quantity.doubleValue(for: unit),
                         "start_date": formatter.string(from: sample.startDate),
                         "end_date": formatter.string(from: sample.endDate),
                     ]
@@ -199,9 +186,6 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         return unit
     }
 
-    func unitAdd(key: String, value: HKUnit) -> Void {
-        unitDict[key] = value
-    }
 
     func dataTypeLookUp(key: String) -> HKSampleType {
         guard let dataType_ = dataTypesDict[key] else {
@@ -210,24 +194,25 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
         return dataType_
     }
 
+    @available(iOS 8.2, *)
     func initializeTypes() {
-        unitDict[BODY_FAT_PERCENTAGE] = HKUnit.percent()
-        unitDict[HEIGHT] = HKUnit.meter()
-        unitDict[BODY_MASS_INDEX] = HKUnit.init(from: "")
-        unitDict[WAIST_CIRCUMFERENCE] = HKUnit.meter()
-        unitDict[STEPS] = HKUnit.count()
-        unitDict[BASAL_ENERGY_BURNED] = HKUnit.kilocalorie()
-        unitDict[ACTIVE_ENERGY_BURNED] = HKUnit.kilocalorie()
-        unitDict[HEART_RATE] = HKUnit.init(from: "count/min")
-        unitDict[BODY_TEMPERATURE] = HKUnit.degreeCelsius()
-        unitDict[BLOOD_PRESSURE_SYSTOLIC] = HKUnit.millimeterOfMercury()
-        unitDict[BLOOD_PRESSURE_DIASTOLIC] = HKUnit.millimeterOfMercury()
-        unitDict[RESTING_HEART_RATE] = HKUnit.init(from: "count/min")
-        unitDict[WALKING_HEART_RATE] = HKUnit.init(from: "count/min")
-        unitDict[BLOOD_OXYGEN] = HKUnit.percent()
-        unitDict[BLOOD_GLUCOSE] = HKUnit.init(from: "mg/dl")
-        unitDict[ELECTRODERMAL_ACTIVITY] = HKUnit.siemen()
-        unitDict[WEIGHT] = HKUnit.gramUnit(with: .kilo)
+//        unitDict[BODY_FAT_PERCENTAGE] = HKUnit.percent()
+//        unitDict[HEIGHT] = HKUnit.meter()
+//        unitDict[BODY_MASS_INDEX] = HKUnit.init(from: "")
+//        unitDict[WAIST_CIRCUMFERENCE] = HKUnit.meter()
+//        unitDict[STEPS] = HKUnit.count()
+//        unitDict[BASAL_ENERGY_BURNED] = HKUnit.kilocalorie()
+//        unitDict[ACTIVE_ENERGY_BURNED] = HKUnit.kilocalorie()
+//        unitDict[HEART_RATE] = HKUnit.init(from: "count/min")
+//        unitDict[BODY_TEMPERATURE] = HKUnit.degreeCelsius()
+//        unitDict[BLOOD_PRESSURE_SYSTOLIC] = HKUnit.millimeterOfMercury()
+//        unitDict[BLOOD_PRESSURE_DIASTOLIC] = HKUnit.millimeterOfMercury()
+//        unitDict[RESTING_HEART_RATE] = HKUnit.init(from: "count/min")
+//        unitDict[WALKING_HEART_RATE] = HKUnit.init(from: "count/min")
+//        unitDict[BLOOD_OXYGEN] = HKUnit.percent()
+//        unitDict[BLOOD_GLUCOSE] = HKUnit.init(from: "mg/dl")
+//        unitDict[ELECTRODERMAL_ACTIVITY] = HKUnit.siemen()
+//        unitDict[WEIGHT] = HKUnit.gramUnit(with: .kilo)
 
 
 
@@ -325,6 +310,28 @@ public class SwiftHealthPlugin: NSObject, FlutterPlugin {
 
         // Concatenate heart events and health data types (both may be empty)
         allDataTypes = Set(heartRateEventTypes + healthDataTypes)
+        
+        // Initializing units for types
+        healthStore.preferredUnits(for: healthDataTypes as! Set<HKQuantityType>, completion: { (preferredUnits, error) -> Void in
+            if (error == nil) {
+
+                for dataType in self.healthDataTypes
+                {
+                    self.unitDict[ self.dataTypesDict.someKey(forValue: dataType)! ] = preferredUnits[dataType as! HKQuantityType]
+                }
+                
+            }
+            else
+            {
+                print(error)
+            }
+        })
     }
     
+}
+
+extension Dictionary where Value: Equatable {
+    func someKey(forValue val: Value) -> Key? {
+        return first(where: { $1 == val })?.key
+    }
 }
